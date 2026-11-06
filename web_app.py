@@ -133,22 +133,44 @@ tab_input, tab_graph, tab_personas, tab_feed, tab_report, tab_qa = st.tabs([
 # ABA 1: CENÁRIO
 with tab_input:
     st.subheader("Defina o Cenário a ser Previsto")
-    
+
+    if "scenario_text" not in st.session_state:
+        st.session_state.scenario_text = ""
+
+    col_mode, col_preset = st.columns([1, 2])
+    with col_mode:
+        input_mode = st.radio(
+            "Origem do Cenário:",
+            ["✍️ Digitar Cenário Próprio", "📋 Usar Exemplo Pronto"],
+            horizontal=False
+        )
+
     presets = {
-        "Customizado": "",
         "Reajuste de Preço de Streaming (+25%)": "A plataforma de streaming StreamFlix anunciou no Brasil um reajuste de 25% na mensalidade padrão e o início do bloqueio automático de compartilhamento de senhas fora da mesma residência, oferecendo apenas a opção de perfil extra pago por R$ 12,90/mês.",
         "Lançamento de Conta Digital com Taxa de Inatividade": "O banco digital NeoBank anunciou que contas com saldo menor que R$ 100 sem movimentação por mais de 90 dias passarão a pagar tarifa mensal de manutenção de R$ 9,90.",
         "Retorno 100% Presencial no Trabalho": "A empresa de tecnologia TechCorp anunciou o encerramento do modelo híbrido e a exigência de trabalho presencial compulsório de 5 dias por semana para todos os funcionários."
     }
-    
-    selected_preset = st.selectbox("Escolha um cenário pronto ou digite o seu:", list(presets.keys()))
-    default_text = presets[selected_preset] if selected_preset != "Customizado" else "Digite o cenário de mercado, política ou produto aqui..."
-    
-    scenario_input = st.text_area("Descrição detalhada do cenário:", value=default_text, height=140)
+
+    with col_preset:
+        if input_mode == "📋 Usar Exemplo Pronto":
+            selected_preset = st.selectbox("Escolha um cenário de exemplo:", list(presets.keys()))
+            if st.button("📥 Inserir este exemplo no editor"):
+                st.session_state.scenario_text = presets[selected_preset]
+                st.rerun()
+
+    scenario_input = st.text_area(
+        "Descrição detalhada do seu cenário (empresa, mercado, produto, mudança de preço, regra ou política):",
+        value=st.session_state.scenario_text,
+        placeholder="Digite livremente aqui... Exemplo: 'Minha empresa de SaaS vai descontinuar o plano gratuito a partir do mês que vem e migrar todos para um plano pago de R$ 49/mês...'",
+        height=180,
+        help="Escreva livremente qualquer contexto, lançamento de produto ou mudança que deseja testar."
+    )
+    # Mantém o session_state sincronizado com o que foi digitado
+    st.session_state.scenario_text = scenario_input
 
     if st.button("🚀 Iniciar Simulação de Enxame", type="primary", use_container_width=True):
-        if not scenario_input.strip() or scenario_input == "Digite o cenário de mercado, política ou produto aqui...":
-            st.warning("Por favor, descreva um cenário válido.")
+        if not scenario_input or not scenario_input.strip():
+            st.warning("⚠️ Por favor, digite a descrição do cenário no campo acima antes de iniciar.")
         else:
             with st.spinner("Processando GraphRAG e simulando enxame..."):
                 llm = LLMClient()
