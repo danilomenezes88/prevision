@@ -193,10 +193,12 @@ class LLMClient:
         }
         payload: Dict[str, Any] = {
             "model": model,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
+            "max_tokens": max(max_tokens, 1500),
             "messages": [{"role": "user", "content": prompt}]
         }
+        # Desativa thinking explícito para velocidade e resposta direta
+        payload["thinking"] = {"type": "disabled"}
+
         if system_prompt:
             payload["system"] = system_prompt
 
@@ -204,7 +206,13 @@ class LLMClient:
             resp = client.post(url, headers=headers, json=payload)
             resp.raise_for_status()
             data = resp.json()
-            return data["content"][0]["text"]
+            # Extrai apenas os blocos de texto da resposta
+            text_parts = [
+                block.get("text", "")
+                for block in data.get("content", [])
+                if block.get("type") == "text"
+            ]
+            return "\n".join(text_parts).strip()
 
     def _mock_generate(self, prompt: str, system_prompt: Optional[str], response_json: bool) -> str:
         """Gera respostas estruturadas simuladas realistas quando executado sem chaves."""

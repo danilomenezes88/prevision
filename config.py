@@ -21,8 +21,12 @@ except ImportError:
 
 @dataclass
 class Config:
-    # Provedor padrão: openai | gemini | anthropic | groq | ollama
-    llm_provider: str = os.getenv("LLM_PROVIDER", "openai").lower()
+    # Provedor padrão: anthropic | openai | gemini | groq | ollama
+    llm_provider: str = os.getenv("LLM_PROVIDER", "anthropic").lower()
+
+    # Anthropic Claude (Padrão)
+    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
+    anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "claude-haiku-5-5")
 
     # OpenAI
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
@@ -32,10 +36,6 @@ class Config:
     # Google Gemini
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-
-    # Anthropic
-    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
-    anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-20241022")
 
     # Groq
     groq_api_key: str = os.getenv("GROQ_API_KEY", "")
@@ -49,6 +49,20 @@ class Config:
     default_num_agents: int = int(os.getenv("DEFAULT_NUM_AGENTS", "20"))
     default_num_rounds: int = int(os.getenv("DEFAULT_NUM_ROUNDS", "3"))
     temperature: float = float(os.getenv("TEMPERATURE", "0.7"))
+
+    def __post_init__(self):
+        # Tenta carregar do Streamlit Cloud Secrets se disponível
+        try:
+            import streamlit as st
+            if hasattr(st, "secrets"):
+                if not self.anthropic_api_key and "ANTHROPIC_API_KEY" in st.secrets:
+                    self.anthropic_api_key = str(st.secrets["ANTHROPIC_API_KEY"])
+                if not self.openai_api_key and "OPENAI_API_KEY" in st.secrets:
+                    self.openai_api_key = str(st.secrets["OPENAI_API_KEY"])
+                if not self.gemini_api_key and "GEMINI_API_KEY" in st.secrets:
+                    self.gemini_api_key = str(st.secrets["GEMINI_API_KEY"])
+        except Exception:
+            pass
 
 
 # Instância global padrão

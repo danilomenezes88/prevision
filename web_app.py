@@ -77,20 +77,32 @@ st.sidebar.markdown("Configure as credenciais e parâmetros da inteligência de 
 
 provider = st.sidebar.selectbox(
     "Provedor de LLM:",
-    ["OpenAI", "Gemini", "Anthropic", "Groq", "Ollama"],
+    ["Anthropic (Claude)", "OpenAI", "Gemini", "Groq", "Ollama"],
     index=0
 )
-config.llm_provider = provider.lower()
 
-api_key = st.sidebar.text_input(f"Chave de API ({provider}):", type="password", help="Se deixado em branco, executará em modo de simulação/mock.")
-if api_key:
-    if provider == "OpenAI":
+# Mapeia nome do provedor
+clean_provider = "anthropic" if "Anthropic" in provider else provider.lower()
+config.llm_provider = clean_provider
+
+# Chave pré-carregada padrão
+default_key = config.anthropic_api_key if clean_provider == "anthropic" else ""
+api_key = st.sidebar.text_input(
+    f"Chave de API ({clean_provider.capitalize()}):",
+    value=default_key,
+    type="password",
+    help="Chave carregada do ambiente. Altere se desejar usar outra."
+)
+
+if clean_provider == "anthropic" and (api_key or config.anthropic_api_key):
+    config.anthropic_api_key = api_key or config.anthropic_api_key
+    st.sidebar.success("⚡ Claude 3.5 / Haiku Conectado")
+elif api_key:
+    if clean_provider == "openai":
         config.openai_api_key = api_key
-    elif provider == "Gemini":
+    elif clean_provider == "gemini":
         config.gemini_api_key = api_key
-    elif provider == "Anthropic":
-        config.anthropic_api_key = api_key
-    elif provider == "Groq":
+    elif clean_provider == "groq":
         config.groq_api_key = api_key
 
 st.sidebar.markdown("---")
