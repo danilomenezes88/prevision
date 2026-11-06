@@ -1,6 +1,6 @@
 """
-MiroFish BR - Web Application (Streamlit)
-Painel Interativo de Simulação Preditiva e Inteligência de Enxame.
+Prevision AI - Web Application (Streamlit)
+Plataforma de Inteligência Preditiva, Biblioteca de Dados e Simulação de Enxame Multiagente.
 """
 
 import streamlit as st
@@ -18,11 +18,12 @@ from graph_rag import GraphRAG
 from persona_generator import PersonaGenerator
 from simulation_engine import SwarmSimulationEngine
 from report_agent import ReportAgent
+from document_store import document_store
 
 # Configuração de Página
 st.set_page_config(
-    page_title="MiroFish BR - Simulação Preditiva",
-    page_icon="🐟",
+    page_title="Prevision - Inteligência Preditiva",
+    page_icon="🔮",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -31,8 +32,8 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main-header {
-        font-size: 2.2rem;
-        font-weight: 700;
+        font-size: 2.3rem;
+        font-weight: 800;
         color: #1E3A8A;
         margin-bottom: 0.2rem;
     }
@@ -68,12 +69,19 @@ st.markdown("""
         border-radius: 12px;
         font-size: 0.8rem;
     }
+    .repo-card {
+        background-color: #F1F5F9;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # Sidebar - Configurações
 st.sidebar.title("⚙️ Configurações do Motor")
-st.sidebar.markdown("Configure as credenciais e parâmetros da inteligência de enxame.")
+st.sidebar.markdown("Gerencie o provedor de IA e os parâmetros da inteligência de enxame.")
 
 provider = st.sidebar.selectbox(
     "Provedor de LLM:",
@@ -81,17 +89,15 @@ provider = st.sidebar.selectbox(
     index=0
 )
 
-# Mapeia nome do provedor
 clean_provider = "anthropic" if "Anthropic" in provider else provider.lower()
 config.llm_provider = clean_provider
 
-# Chave pré-carregada padrão
 default_key = config.anthropic_api_key if clean_provider == "anthropic" else ""
 api_key = st.sidebar.text_input(
     f"Chave de API ({clean_provider.capitalize()}):",
     value=default_key,
     type="password",
-    help="Chave carregada do ambiente. Altere se desejar usar outra."
+    help="Chave carregada do ambiente seguro."
 )
 
 if clean_provider == "anthropic" and (api_key or config.anthropic_api_key):
@@ -115,27 +121,29 @@ if "sim_data" not in st.session_state:
     st.session_state.sim_data = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "scenario_text" not in st.session_state:
+    st.session_state.scenario_text = ""
 
 # Cabeçalho Principal
-st.markdown('<div class="main-header">🐟 MiroFish BR — Swarm Intelligence Prediction</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Motor de simulação preditiva multiagente e previsão social baseada em GraphRAG.</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">🔮 Prevision — Swarm Intelligence Prediction</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Plataforma preditiva multiagente, GraphRAG relacional e Biblioteca de Conhecimento.</div>', unsafe_allow_html=True)
 
 # Abas Principais
-tab_input, tab_graph, tab_personas, tab_feed, tab_report, tab_qa = st.tabs([
-    "🎯 1. Cenário Semente",
-    "🕸️ 2. Grafo (GraphRAG)",
-    "👥 3. Enxame de Agentes",
-    "📱 4. Feed da Simulação",
-    "📊 5. Relatório Preditivo",
-    "💬 6. Interrogar o Mundo"
+tab_input, tab_repo, tab_graph, tab_personas, tab_feed, tab_report, tab_qa = st.tabs([
+    "🎯 1. Cenário & Simulação",
+    "📚 2. Biblioteca de Dados",
+    "🕸️ 3. Grafo (GraphRAG)",
+    "👥 4. Enxame de Agentes",
+    "📱 5. Feed da Simulação",
+    "📊 6. Relatório Preditivo",
+    "💬 7. Interrogar o Mundo"
 ])
 
-# ABA 1: CENÁRIO
+# ==============================================================================
+# ABA 1: CENÁRIO & SIMULAÇÃO
+# ==============================================================================
 with tab_input:
-    st.subheader("Defina o Cenário a ser Previsto")
-
-    if "scenario_text" not in st.session_state:
-        st.session_state.scenario_text = ""
+    st.subheader("1. Defina a Decisão ou Cenário a ser Previsto")
 
     col_mode, col_preset = st.columns([1, 2])
     with col_mode:
@@ -159,40 +167,93 @@ with tab_input:
                 st.rerun()
 
     scenario_input = st.text_area(
-        "Descrição detalhada do seu cenário (empresa, mercado, produto, mudança de preço, regra ou política):",
+        "Descrição da decisão, política, lançamento de produto ou evento:",
         value=st.session_state.scenario_text,
-        placeholder="Digite livremente aqui... Exemplo: 'Minha empresa de SaaS vai descontinuar o plano gratuito a partir do mês que vem e migrar todos para um plano pago de R$ 49/mês...'",
-        height=180,
-        help="Escreva livremente qualquer contexto, lançamento de produto ou mudança que deseja testar."
+        placeholder="Digite livremente o cenário que você deseja prever... Exemplo: 'Nossa empresa planeja lançar uma taxa de entrega de R$ 4,99 para pedidos abaixo de R$ 50...'",
+        height=160,
+        help="Escreva o contexto da decisão para os agentes debaterem e avaliarem."
     )
-    # Mantém o session_state sincronizado com o que foi digitado
     st.session_state.scenario_text = scenario_input
 
-    if st.button("🚀 Iniciar Simulação de Enxame", type="primary", use_container_width=True):
+    # SEÇÃO DA BIBLIOTECA DE DADOS NA SIMULAÇÃO
+    st.markdown("---")
+    st.subheader("2. Biblioteca de Dados (Repositório de Conhecimento)")
+
+    all_docs = document_store.list_documents()
+
+    if not all_docs:
+        st.info("ℹ️ Nenhum documento cadastrado na biblioteca ainda. Você pode adicionar documentos (PDF, TXT, CSV) na aba **'📚 2. Biblioteca de Dados'** ou continuar apenas com o texto digitado.")
+        selected_doc_ids = []
+    else:
+        st.markdown("Selecione quais documentos do seu repositório devem ser injetados para enriquecer o contexto dos agentes e do Grafo:")
+        
+        col_repo_mode, col_repo_select = st.columns([1, 2])
+        with col_repo_mode:
+            repo_selection_mode = st.radio(
+                "Modo de uso dos dados:",
+                ["🔘 Selecionar Manualmente", "⚡ Seleção Automática Relevante", "❌ Não usar dados do repositório"],
+                index=0
+            )
+
+        with col_repo_select:
+            if repo_selection_mode == "🔘 Selecionar Manualmente":
+                doc_options = {d["id"]: f"📄 {d['name']} ({d['category']} • {d['word_count']} palavras)" for d in all_docs}
+                selected_doc_ids = st.multiselect(
+                    "Escolha os documentos para esta simulação:",
+                    options=list(doc_options.keys()),
+                    format_func=lambda x: doc_options[x],
+                    default=list(doc_options.keys())[:3]
+                )
+            elif repo_selection_mode == "⚡ Seleção Automática Relevante":
+                if scenario_input.strip():
+                    auto_ids = document_store.auto_select_relevant_docs(scenario_input)
+                    selected_doc_ids = auto_ids if auto_ids else [d["id"] for d in all_docs[:2]]
+                    st.success(f"🤖 O motor identificou {len(selected_doc_ids)} documento(s) com palavras-chave relevantes ao seu cenário.")
+                else:
+                    selected_doc_ids = [d["id"] for d in all_docs[:2]]
+                    st.caption("Digite o cenário para o motor buscar documentos por afinidade temática.")
+            else:
+                selected_doc_ids = []
+
+        if selected_doc_ids:
+            total_chars = sum([d["char_count"] for d in all_docs if d["id"] in selected_doc_ids])
+            st.success(f"✓ **{len(selected_doc_ids)} documento(s) do repositório serão incorporados** ao GraphRAG e à memória dos agentes (~{total_chars:,} caracteres).")
+
+    st.markdown("---")
+
+    # BOTÃO PRINCIPAL DE EXECUÇÃO
+    if st.button("🚀 Iniciar Simulação Preditiva", type="primary", use_container_width=True):
         if not scenario_input or not scenario_input.strip():
-            st.warning("⚠️ Por favor, digite a descrição do cenário no campo acima antes de iniciar.")
+            st.warning("⚠️ Por favor, preencha o cenário no campo de texto acima.")
         else:
-            with st.spinner("Processando GraphRAG e simulando enxame..."):
+            with st.spinner("Construindo GraphRAG, instanciando enxame e simulando rodadas com Claude..."):
                 llm = LLMClient()
                 
+                # Monta contexto combinado (Cenário + Documentos da Biblioteca)
+                combined_context = scenario_input
+                if selected_doc_ids:
+                    repo_context = document_store.get_combined_context(selected_doc_ids)
+                    combined_context = f"{scenario_input}\n\n[DADOS E DOCUMENTOS DA BIBLIOTECA DE CONHECIMENTO]:\n{repo_context}"
+
                 # 1. GraphRAG
                 graph_rag = GraphRAG(llm=llm)
-                graph_data = graph_rag.build_from_text(scenario_input)
+                graph_data = graph_rag.build_from_text(combined_context)
                 
                 # 2. Personas
                 gen = PersonaGenerator(llm=llm)
-                agents = gen.generate_population(scenario_input, graph_rag, total_agents=num_agents)
+                agents = gen.generate_population(combined_context, graph_rag, total_agents=num_agents)
                 
-                # 3. Engine
-                engine = SwarmSimulationEngine(scenario=scenario_input, agents=agents, graph_rag=graph_rag, llm=llm)
+                # 3. Engine de Enxame
+                engine = SwarmSimulationEngine(scenario=combined_context, agents=agents, graph_rag=graph_rag, llm=llm)
                 rounds_history = engine.run_simulation(total_rounds=num_rounds)
                 
-                # 4. Report
+                # 4. Relatório Preditivo
                 reporter = ReportAgent(simulation=engine, llm=llm)
                 report = reporter.generate_prediction_report()
                 
                 st.session_state.sim_data = {
                     "scenario": scenario_input,
+                    "selected_docs": selected_doc_ids,
                     "graph_data": graph_data,
                     "agents": agents,
                     "engine": engine,
@@ -200,43 +261,132 @@ with tab_input:
                     "reporter": reporter,
                     "report": report
                 }
-                st.success("Simulação concluída com sucesso! Navegue pelas abas acima para explorar.")
+                st.success("✅ Simulação concluída com sucesso! Navegue pelas abas acima para conferir os resultados.")
 
-# Verificação se simulação foi executada
+# ==============================================================================
+# ABA 2: BIBLIOTECA DE DADOS (REPOSITÓRIO)
+# ==============================================================================
+with tab_repo:
+    st.subheader("📚 Repositório de Documentos e Biblioteca de Conhecimento")
+    st.markdown(
+        "Carregue relatórios, pesquisas de mercado, políticas de preços, históricos de clientes e documentos regulatórios. "
+        "Eles ficam salvos no seu repositório permanente para você reutilizar em qualquer previsão sem precisar reenviar."
+    )
+
+    col_up1, col_up2 = st.columns([2, 1])
+    with col_up1:
+        uploaded_files = st.file_uploader(
+            "Enviar novos arquivos para o repositório (PDF, TXT, MD, CSV, JSON):",
+            type=["pdf", "txt", "md", "csv", "json"],
+            accept_multiple_files=True
+        )
+    with col_up2:
+        category_choice = st.selectbox(
+            "Categoria dos documentos:",
+            ["Pesquisa de Mercado", "Financeiro / Preços", "Políticas & Regras", "Feedback de Clientes", "Concorrência", "Geral"]
+        )
+        if uploaded_files:
+            if st.button("💾 Salvar no Repositório", type="primary"):
+                saved_count = 0
+                for uf in uploaded_files:
+                    file_bytes = uf.read()
+                    extracted_text = document_store.extract_text_from_upload(uf.name, file_bytes)
+                    if extracted_text and not extracted_text.startswith("[Erro"):
+                        document_store.add_document(uf.name, extracted_text, category=category_choice)
+                        saved_count += 1
+                st.success(f"✓ {saved_count} documento(s) salvos com sucesso na biblioteca!")
+                st.rerun()
+
+    st.markdown("---")
+    st.subheader("Documentos Salvos na Biblioteca")
+
+    current_docs = document_store.list_documents()
+
+    if not current_docs:
+        st.info("Sua biblioteca de dados está vazia no momento.")
+        if st.button("📥 Inserir Documentos de Exemplo (Demonstração)"):
+            document_store.add_document(
+                "Pesquisa_Mercado_Consumidor_2026.txt",
+                "PESQUISA DE MERCADO NACIONAL 2026:\n- 72% dos consumidores brasileiros declaram que cancelariam um serviço caso haja aumento acima de 15% sem novas funcionalidades claras.\n- 58% dos clientes valorizam suporte ágil e estabilidade acima de inovações complexas.\n- O segmento jovem (18-34) apresenta a maior taxa de volatilidade e migração para novos concorrentes.",
+                category="Pesquisa de Mercado"
+            )
+            document_store.add_document(
+                "Analise_Concorrencia_e_Precos.txt",
+                "MAPA DE CONCORRÊNCIA E PRECIFICAÇÃO:\n- Concorrente Alpha: Oferece planos a partir de R$ 29,90 com política agressiva de atração de clientes insatisfeitos.\n- Concorrente Beta: Foco em clientes premium com taxa de retenção de 85%.\n- Práticas recomendadas: Oferecer descontos progressivos para retenção de clientes antigos (grandfathering).",
+                category="Concorrência"
+            )
+            document_store.add_document(
+                "Diretrizes_Regulatorias_e_Procon.txt",
+                "DIRETRIZES DE DEFESA DO CONSUMIDOR (PROCON):\n- Reajustes unilaterais exigem notificação prévia expressa de no mínimo 30 dias com transparência nos canais de atendimento.\n- Cláusulas de fidelidade automática pós-reajuste são consideradas abusivas por tribunais de pequenas causas.",
+                category="Políticas & Regras"
+            )
+            st.success("Documentos de exemplo carregados!")
+            st.rerun()
+    else:
+        for doc in current_docs:
+            with st.container():
+                st.markdown(f"""
+                <div class="repo-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b>📄 {doc['name']}</b>
+                        <span class="badge-pos">{doc['category']}</span>
+                    </div>
+                    <small style="color: #64748B;">
+                        Criado em: {doc['created_at']} • {doc['char_count']:,} caracteres • ~{doc['word_count']:,} palavras
+                    </small>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                col_view, col_del = st.columns([5, 1])
+                with col_view:
+                    with st.expander(f"Ver prévia do conteúdo ({doc['name']})"):
+                        content = document_store.get_document_content(doc["id"]) or ""
+                        st.text_area("Conteúdo extraído:", value=content, height=180, key=f"preview_{doc['id']}", disabled=True)
+                with col_del:
+                    if st.button("🗑️ Excluir", key=f"del_{doc['id']}"):
+                        document_store.delete_document(doc["id"])
+                        st.rerun()
+
+# ==============================================================================
+# DADOS DA SIMULAÇÃO
+# ==============================================================================
 data = st.session_state.sim_data
 
-# ABA 2: GRAPHRAG
+# ==============================================================================
+# ABA 3: GRAPHRAG
+# ==============================================================================
 with tab_graph:
     if not data:
-        st.info("Execute uma simulação na aba '1. Cenário Semente' para visualizar o grafo.")
+        st.info("Execute uma simulação na aba '1. Cenário & Simulação' para visualizar o Grafo de Conhecimento.")
     else:
         st.subheader("Entidades e Relacionamentos Extraídos (GraphRAG)")
         g = data["graph_data"]
         
         col1, col2 = st.columns(2)
-        col1.metric("Nós (Entidades)", g["num_nodes"])
-        col2.metric("Arestas (Relações)", g["num_edges"])
+        col1.metric("Nós (Entidades Mapeadas)", g["num_nodes"])
+        col2.metric("Arestas (Relações Causais)", g["num_edges"])
         
         col_nodes, col_edges = st.columns(2)
         with col_nodes:
-            st.markdown("#### Entidades Identificadas")
+            st.markdown("#### Entidades Identificadas no Cenário e Documentos")
             df_nodes = pd.DataFrame(g["nodes"])
             st.dataframe(df_nodes, use_container_width=True)
             
         with col_edges:
-            st.markdown("#### Relações de Causa e Efeito")
+            st.markdown("#### Relações de Causa, Efeito e Influência")
             df_edges = pd.DataFrame(g["edges"])
             st.dataframe(df_edges, use_container_width=True)
 
-# ABA 3: PERSONAS
+# ==============================================================================
+# ABA 4: PERSONAS
+# ==============================================================================
 with tab_personas:
     if not data:
         st.info("Execute uma simulação para visualizar a população de agentes.")
     else:
-        st.subheader(f"População de Agentes ({len(data['agents'])} Personas)")
+        st.subheader(f"População Heterogênea de Agentes ({len(data['agents'])} Personas)")
         agents = data["agents"]
         
-        # Grid de cards de agentes
         cols = st.columns(3)
         for idx, agent in enumerate(agents):
             with cols[idx % 3]:
@@ -251,7 +401,9 @@ with tab_personas:
                 </div>
                 """, unsafe_allow_html=True)
 
-# ABA 4: FEED
+# ==============================================================================
+# ABA 5: FEED SOCIAL SIMULADO
+# ==============================================================================
 with tab_feed:
     if not data:
         st.info("Execute uma simulação para acompanhar as interações do enxame.")
@@ -290,7 +442,9 @@ with tab_feed:
             </div>
             """, unsafe_allow_html=True)
 
-# ABA 5: RELATÓRIO PREDITIVO
+# ==============================================================================
+# ABA 6: RELATÓRIO PREDITIVO
+# ==============================================================================
 with tab_report:
     if not data:
         st.info("Execute uma simulação para obter o relatório preditivo executivo.")
@@ -300,7 +454,6 @@ with tab_report:
         
         st.subheader("Relatório Preditivo de Tomada de Decisão")
         
-        # Cartões de Métricas Principais
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Probabilidade de Sucesso", f"{rep.success_probability:.1f}%")
         m2.metric("Nível de Risco", rep.risk_level)
@@ -310,7 +463,6 @@ with tab_report:
         
         st.markdown("---")
         
-        # Gráficos de Evolução
         st.markdown("#### Evolução Temporal por Rodada")
         chart_data = pd.DataFrame({
             "Rodada": [r.round_num for r in rounds],
@@ -326,16 +478,18 @@ with tab_report:
         st.download_button(
             label="📥 Baixar Relatório em Markdown",
             data=rep.raw_markdown,
-            file_name="relatorio_preditivo_mirofish.md",
+            file_name="relatorio_preditivo_prevision.md",
             mime="text/markdown"
         )
 
-# ABA 6: INTERROGAR O MUNDO
+# ==============================================================================
+# ABA 7: INTERROGAR O MUNDO
+# ==============================================================================
 with tab_qa:
     if not data:
         st.info("Execute uma simulação para habilitar a interrogação de agentes.")
     else:
-        st.subheader("Oráculo & Entrevistas de Agentes")
+        st.subheader("Oráculo Analítico & Entrevistas com Agentes")
         reporter = data["reporter"]
         
         mode = st.radio("Modo de Interação:", ["Oráculo Global (Sintetizador)", "Entrevistar Persona Específica"], horizontal=True)
@@ -344,7 +498,7 @@ with tab_qa:
             user_question = st.text_input("Faça uma pergunta sobre os riscos, desdobramentos ou cenários alternativos:")
             if st.button("Consultar Oráculo"):
                 if user_question:
-                    with st.spinner("Analisando todas as interações do enxame..."):
+                    with st.spinner("Analisando evidências do enxame com Claude..."):
                         ans = reporter.interrogate_world(user_question)
                         st.markdown(f"**Resposta da Simulação:**\n\n{ans}")
         else:

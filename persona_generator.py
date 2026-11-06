@@ -1,5 +1,5 @@
 """
-MiroFish Engine - Persona Generator
+Prevision AI Engine - Persona Generator
 Gera populações heterogêneas de agentes autônomos com personalidades psicológicas,
 vieses, convicções e níveis de influência a partir do cenário e do Grafo de Conhecimento.
 """
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from llm_client import LLMClient
 from graph_rag import GraphRAG
 
-logger = logging.getLogger("MiroFish.PersonaGenerator")
+logger = logging.getLogger("Prevision.PersonaGenerator")
 
 
 class AgentPersona(BaseModel):

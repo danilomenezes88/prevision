@@ -1,5 +1,5 @@
 """
-MiroFish Engine - Unified LLM Client
+Prevision AI Engine - Unified LLM Client
 Suporta OpenAI, Google Gemini, Anthropic Claude, Groq e Ollama.
 Inclui modo de fallback / demonstração para testes offline ou sem chave de API imediata.
 """
@@ -12,7 +12,7 @@ import httpx
 
 from config import config
 
-logger = logging.getLogger("MiroFish.LLMClient")
+logger = logging.getLogger("Prevision.LLMClient")
 
 
 class LLMClient:

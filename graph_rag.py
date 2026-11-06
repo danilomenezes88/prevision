@@ -1,5 +1,5 @@
 """
-MiroFish Engine - GraphRAG Module
+Prevision AI Engine - GraphRAG Module
 Extração estruturada de entidades, conexões e grafo de conhecimento relacional
 a partir de documentos e cenários semente (Seed Materials).
 """
@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from llm_client import LLMClient
 
-logger = logging.getLogger("MiroFish.GraphRAG")
+logger = logging.getLogger("Prevision.GraphRAG")
 
 
 class Entity(BaseModel):

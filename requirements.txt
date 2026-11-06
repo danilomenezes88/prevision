@@ -1,4 +1,4 @@
-# MiroFish Engine - Dependências
+# Prevision AI Engine - Dependências
 pydantic>=2.0.0
 networkx>=3.0
 httpx>=0.25.0
@@ -7,3 +7,5 @@ python-dotenv>=1.0.0
 streamlit>=1.30.0
 matplotlib>=3.7.0
 pandas>=2.0.0
+pypdf>=4.0.0
+

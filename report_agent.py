@@ -1,5 +1,5 @@
 """
-MiroFish Engine - Report & Prediction Agent
+Prevision AI Engine - Report & Prediction Agent
 Analisa o comportamento emergente do enxame, calcula probabilidades preditivas,
 compila relatórios executivos e permite interrogar o mundo simulado e seus agentes.
 """
@@ -12,7 +12,7 @@ from llm_client import LLMClient
 from simulation_engine import SwarmSimulationEngine, RoundMetrics
 from persona_generator import AgentPersona
 
-logger = logging.getLogger("MiroFish.ReportAgent")
+logger = logging.getLogger("Prevision.ReportAgent")
 
 
 class PredictionReport(BaseModel):
@@ -64,7 +64,7 @@ class ReportAgent:
         ])
 
         system_prompt = (
-            "Você é o Chief Predictive Officer e Analista Chefe do motor MiroFish de Inteligência de Enxame. "
+            "Você é o Chief Predictive Officer e Analista Chefe do motor Prevision de Inteligência de Enxame. "
             "Sua especialidade é analisar comportamentos emergentes em simulações sociais/mercadológicas "
             "e gerar relatórios preditivos rigorosos, pragmáticos e de alto impacto executivo para tomada de decisão."
         )
@@ -123,7 +123,7 @@ ESTRUTURE SEU RELATÓRIO EM MARKDOWN COM OS SEGUINTES TÓPICOS:
         feed_summary = "\n".join([f"[@{p.author_name}]: {p.content}" for p in self.sim.feed[-15:]])
 
         prompt = f"""
-O usuário está interrogando o mundo simulado do MiroFish com a seguinte pergunta:
+O usuário está interrogando o mundo simulado do Prevision com a seguinte pergunta:
 "{question}"
 
 Cenário Base:

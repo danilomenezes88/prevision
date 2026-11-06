@@ -1,5 +1,5 @@
 """
-MiroFish Engine - Interface CLI
+Prevision AI Engine - Interface CLI
 Permite executar simulações completas de enxame preditivo diretamente do terminal.
 """
 
@@ -20,7 +20,7 @@ from report_agent import ReportAgent
 
 def run_cli_simulation(scenario: str, num_agents: int = 15, num_rounds: int = 3, provider: str = None):
     print("=" * 70)
-    print("🐟 MIROFISH ENGINE - SIMULADOR PREDITIVO DE INTELIGÊNCIA DE ENXAME")
+    print("🔮 PREVISION ENGINE - SIMULADOR PREDITIVO DE INTELIGÊNCIA DE ENXAME")
     print("=" * 70)
 
     if provider:
@@ -97,7 +97,7 @@ def run_cli_simulation(scenario: str, num_agents: int = 15, num_rounds: int = 3,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="MiroFish Swarm Intelligence Prediction Engine CLI")
+    parser = argparse.ArgumentParser(description="Prevision Swarm Intelligence Prediction Engine CLI")
     parser.add_argument(
         "--scenario",
         type=str,

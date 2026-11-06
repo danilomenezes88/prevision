@@ -1,6 +1,6 @@
 """
-Testes automatizados para o MiroFish Engine.
-Valida o pipeline completo: GraphRAG -> Personas -> Simulação -> Relatório.
+Testes automatizados para o Prevision AI Engine.
+Valida o pipeline completo: GraphRAG -> Personas -> Simulação -> Relatório -> Biblioteca de Dados.
 """
 
 import unittest
@@ -15,9 +15,10 @@ from graph_rag import GraphRAG
 from persona_generator import PersonaGenerator
 from simulation_engine import SwarmSimulationEngine
 from report_agent import ReportAgent
+from document_store import DocumentStore
 
 
-class TestMiroFishEngine(unittest.TestCase):
+class TestPrevisionEngine(unittest.TestCase):
     def setUp(self):
         self.llm = LLMClient()
         self.scenario = (
@@ -78,6 +79,24 @@ class TestMiroFishEngine(unittest.TestCase):
         self.assertIsInstance(agent_reply, str)
         self.assertGreater(len(agent_reply), 5)
 
+    def test_document_store_lifecycle(self):
+        store = DocumentStore()
+        doc = store.add_document("teste_unit.txt", "Texto de teste para validação de repositório.", category="Teste")
+        self.assertIn("id", doc)
+        
+        docs = store.list_documents()
+        self.assertGreaterEqual(len(docs), 1)
+        
+        content = store.get_document_content(doc["id"])
+        self.assertEqual(content, "Texto de teste para validação de repositório.")
+        
+        ctx = store.get_combined_context([doc["id"]])
+        self.assertIn("teste_unit.txt", ctx)
+        
+        deleted = store.delete_document(doc["id"])
+        self.assertTrue(deleted)
+
 
 if __name__ == "__main__":
     unittest.main()
+

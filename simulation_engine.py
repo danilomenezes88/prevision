@@ -1,5 +1,5 @@
 """
-MiroFish Engine - Swarm Simulation Engine
+Prevision AI Engine - Swarm Simulation Engine
 Executa a dinâmica de enxame social e mercadológico em rodadas sucessivas (Ticks/Rounds).
 Os agentes publicam, reagem, debatem e atualizam seus sentimentos de forma emergente.
 """
@@ -14,7 +14,7 @@ from llm_client import LLMClient
 from graph_rag import GraphRAG
 from persona_generator import AgentPersona
 
-logger = logging.getLogger("MiroFish.SimulationEngine")
+logger = logging.getLogger("Prevision.SimulationEngine")
 
 
 class SocialPost(BaseModel):
